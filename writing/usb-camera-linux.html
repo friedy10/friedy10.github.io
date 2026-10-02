@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capturing images from a USB camera in C on Linux — Friedrich Doku</title>
+<meta name="description" content="Getting Video4Linux into your kernel config, then pulling frames off the device with a small header and no framework.">
+<link rel="canonical" href="https://fdoku.me/writing/usb-camera-linux.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Capturing images from a USB camera in C on Linux">
+<meta property="og:description" content="Getting Video4Linux into your kernel config, then pulling frames off the device with a small header and no framework.">
+<meta property="og:image" content="https://fdoku.me/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%2307090b'/><text x='16' y='23' font-family='monospace' font-size='18' font-weight='600' fill='%2323a0ff' text-anchor='middle'>fd</text></svg>">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <div class="wrap">
+    <a class="sigil" href="../">fd</a>
+    <nav aria-label="Sections">
+      <a href="../#research">Research</a>
+      <a href="../#publications">Publications</a>
+      <a href="../#writing" data-optional>Writing</a>
+      <a href="../assets/friedrich-doku-cv.pdf">CV</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="article">
+  <div class="wrap">
+    <div class="article-head">
+      <a class="back" href="../#writing">Back to writing</a>
+      <h1>Capturing images from a USB camera in C on Linux</h1>
+      <p class="article-meta"><span class="vintage">May 2021</span> — written as an undergraduate at Pitt</p>
+    </div>
+
+    <div class="body">
+<p>
+  This walks through capturing video from a USB camera in C on Linux, with no framework
+  in the way — just Video4Linux and a small header.
+</p>
+
+<h2>Setting up the kernel</h2>
+<p>
+  Video4Linux has to be in your kernel. On a distribution like Ubuntu or Fedora it
+  almost certainly already is, but check first. Plug the camera in and run:
+</p>
+<pre><code>ls -ltrh /dev/video*</code></pre>
+<p>
+  "No such file or directory" means either V4L is missing from your kernel or the
+  camera is not plugged in. Hopefully the second. If the device showed up, skip ahead.
+</p>
+<p>
+  Otherwise you need to reconfigure the kernel. Find your kernel source and run:
+</p>
+<pre><code>make menuconfig</code></pre>
+<p>First, multimedia support — under Device Drivers, scroll to Multimedia support and press <code>y</code>.</p>
+<figure><img src="../images/v1.png" alt="Kernel menuconfig with Multimedia support being enabled." loading="lazy"><figcaption>Device Drivers &rarr; Multimedia support.</figcaption></figure>
+<p>Then Media USB adapters, under Device Drivers &rarr; Multimedia support &rarr; Media drivers.</p>
+<figure><img src="../images/v2.png" alt="Kernel menuconfig with Media USB adapters being enabled." loading="lazy"><figcaption>Without this the USB camera will not enumerate as a media device.</figcaption></figure>
+<p>
+  Next, Video4Linux core itself, under Device Drivers &rarr; Multimedia support &rarr;
+  Media core support. This is the interface the code will talk to.
+</p>
+<figure><img src="../images/v3.png" alt="Kernel menuconfig with Video4Linux core being enabled." loading="lazy"><figcaption>Video4Linux core — the API everything below depends on.</figcaption></figure>
+<p>Finally USB Video Class, which adds support for USB devices that stream video.</p>
+<figure><img src="../images/v4.png" alt="Kernel menuconfig with USB Video Class support being enabled." loading="lazy"><figcaption>UVC covers essentially every consumer USB webcam.</figcaption></figure>
+<p>Save, rebuild the kernel, and boot into it.</p>
+
+<h2>Getting an image</h2>
+<p>Grabbing frames needs a single header:</p>
+<pre><code>git clone https://github.com/friedrich12/cam.git</code></pre>
+<p>
+  Put the header somewhere your code can reach. It is a small class-like object written
+  in C that wraps the ioctl dance:
+</p>
+<pre><code>#include &lt;cam.h&gt;
+
+ImageGetter g;                            /* the capture object      */
+initialize_imget(g, "/dev/video0");       /* camera device           */
+set_img_format(&amp;g);                       /* image format            */
+setup_buffers(&amp;g);                        /* set up buffers          */
+grab_frame(&amp;g);                           /* grab a frame            */
+
+char  *imgdata = g.buffer;                /* image data              */
+size_t imgsize = g.bufferinfo.bytesused;  /* size of the buffer      */</code></pre>
+<p>
+  The image format is hardcoded in <code>set_img_format</code>; change it there if you
+  need something else.
+</p>
+<p>To list the camera devices on the system:</p>
+<pre><code>ls -ltrh /dev/video*</code></pre>
+<p>
+  Working out which one is your USB camera takes some trial and error. If the machine
+  has a built-in camera, the USB one is usually <code>/dev/video1</code>.
+</p>
+    </div>
+
+    <div class="article-foot">
+      Questions or corrections: <a href="mailto:friedy@u.northwestern.edu">friedy@u.northwestern.edu</a>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Friedrich Doku — Evanston, Illinois</span>
+    <span><a href="../">fdoku.me</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

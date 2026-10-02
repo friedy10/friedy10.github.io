@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started with bare metal on ARM — Friedrich Doku</title>
+<meta name="description" content="What a device tree actually describes, why embedded systems need one when x86 does not, and how U-Boot gets you to a kernel.">
+<link rel="canonical" href="https://fdoku.me/writing/bare-metal-arm.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Getting started with bare metal on ARM">
+<meta property="og:description" content="What a device tree actually describes, why embedded systems need one when x86 does not, and how U-Boot gets you to a kernel.">
+<meta property="og:image" content="https://fdoku.me/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%2307090b'/><text x='16' y='23' font-family='monospace' font-size='18' font-weight='600' fill='%2323a0ff' text-anchor='middle'>fd</text></svg>">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <div class="wrap">
+    <a class="sigil" href="../">fd</a>
+    <nav aria-label="Sections">
+      <a href="../#research">Research</a>
+      <a href="../#publications">Publications</a>
+      <a href="../#writing" data-optional>Writing</a>
+      <a href="../assets/friedrich-doku-cv.pdf">CV</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="article">
+  <div class="wrap">
+    <div class="article-head">
+      <a class="back" href="../#writing">Back to writing</a>
+      <h1>Getting started with bare metal on ARM</h1>
+      <p class="article-meta"><span class="vintage">May 2021</span> — written as an undergraduate at Pitt</p>
+    </div>
+
+    <div class="body">
+<p>
+  Starting bare-metal development on ARM is hard mostly because so much of it is
+  unfamiliar at once. This covers two of the pieces that confused me longest — device
+  trees and U-Boot — and points at where to go next.
+</p>
+
+<h2>Device trees</h2>
+<p>
+  A device tree is a data structure describing a system's hardware. The operating
+  system reads it to find out what exists and where.
+</p>
+<p>
+  On x86 this is unnecessary: hardware is discoverable, so the CPU can enumerate
+  everything on the bus by itself. That matters on a PC, where components are swapped
+  in and out constantly. Embedded systems rarely have removable parts, and most of
+  their buses do not support discovery anyway — so the layout has to be written down
+  instead.
+</p>
+<p>Here is a small one:</p>
+<pre><code>/dts-v1/;
+
+/ {
+
+	cpus { ... };
+
+	aliases {
+		sensor-controller = &amp;i2c1;
+	};
+
+	soc {
+		i2c1: i2c@40002000 {
+			compatible = "vnd,soc-i2c";
+			label = "I2C_1";
+			reg = &lt;0x40002000 0x1000&gt;;
+			status = "okay";
+			clock-frequency = &lt; 100000 &gt;;
+		};
+	};
+};</code></pre>
+<p>
+  This describes a system-on-chip with one I2C controller. There are two nodes:
+  <code>aliases</code>, which gives <code>sensor-controller</code> as another name for
+  the controller, and <code>soc</code>, which holds the devices on the chip itself.
+  Drawn out, the SoC looks like this:
+</p>
+<figure><img src="../images/soc.png" alt="Block diagram of a simple SoC containing an I2C controller." loading="lazy"><figcaption>The same SoC the device tree above describes.</figcaption></figure>
+<p>
+  A real SoC is considerably busier, but the idea holds. Thomas Petazzoni's
+  <a href="https://www.youtube.com/watch?v=Nz6aBffv-Ek">talk on device trees</a> is the
+  best comprehensive treatment I know of.
+</p>
+
+<h2>U-Boot</h2>
+<p>
+  First, bootloader stages. A first-stage bootloader brings the board up far enough to
+  be useful — UART, I2C, I/O — and then hands off to a second stage, which is what
+  actually loads an application or a kernel.
+</p>
+<p>
+  The reason for two is space. The first stage has to fit in a very small amount of
+  memory, so it is used to reach a second one that has room to work in.
+</p>
+<p>
+  U-Boot is the multistage bootloader most embedded systems use. It loads your device
+  tree, configures the SoC from it, and boots the kernel. It has a large command set;
+  here are the few you need to load an image over the network and jump to it:
+</p>
+<pre><code>setenv imgname img.bin
+
+setenv loadaddr 0x42000000
+
+# Make sure the caches are off for now
+setenv bootimg 'tftp ${loadaddr} ${serverip}:${imgname}; go ${loadaddr}'</code></pre>
+<p>
+  <code>setenv</code> sets an environment variable. <code>imgname</code> and
+  <code>loadaddr</code> hold the image name and the address to load it at;
+  <code>bootimg</code> holds the command that does the work.
+  <code>tftp ${loadaddr} ${serverip}:${imgname}</code> pulls the image from a server
+  into <code>loadaddr</code> — TFTP being the Trivial File Transfer Protocol, small
+  enough to live comfortably in a bootloader and the usual way to boot off a LAN. Then
+  <code>go ${loadaddr}</code> jumps to it.
+</p>
+<p>
+  The <a href="https://www.denx.de/wiki/DULG/Manual">Das U-Boot manual</a> has the full
+  command reference.
+</p>
+
+<h2>Picking a board</h2>
+<p>
+  Emulation works, but setting up real hardware is more fun and teaches you more. There
+  are a lot of boards and the differences matter less than you would think — most run
+  similar processors, and what varies is which peripherals are on the SoC. Pick one and
+  start; the skills carry over.
+</p>
+<p>Two I would recommend to begin with, mostly because their communities are large enough that answers are a search away:</p>
+<ul>
+  <li><a href="https://www.raspberrypi.org/products/raspberry-pi-4-model-b/">Raspberry Pi 4 Model B</a></li>
+  <li><a href="https://www.st.com/en/evaluation-tools/stm32mp157a-dk1.html">STM32MP157A-DK1</a></li>
+</ul>
+    </div>
+
+    <div class="article-foot">
+      Questions or corrections: <a href="mailto:friedy@u.northwestern.edu">friedy@u.northwestern.edu</a>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Friedrich Doku — Evanston, Illinois</span>
+    <span><a href="../">fdoku.me</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,18 +1,425 @@
----
-layout: default
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Friedrich Doku — Hardware Security Research</title>
+<meta name="description" content="Friedrich Doku is a PhD candidate at Northwestern University working on hardware security: side channels, firmware, and the physical assumptions underneath trusted computing.">
+<link rel="canonical" href="https://fdoku.me/">
 
-<div class="posts">
-  {% for post in site.posts %}
-    <article class="post">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Friedrich Doku — Hardware Security Research">
+<meta property="og:description" content="PhD candidate at Northwestern working on hardware security: side channels, firmware, and the physical assumptions underneath trusted computing.">
+<meta property="og:url" content="https://fdoku.me/">
+<meta property="og:image" content="https://fdoku.me/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
 
-      <h1><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%2307090b'/><text x='16' y='23' font-family='monospace' font-size='18' font-weight='600' fill='%2323a0ff' text-anchor='middle'>fd</text></svg>">
 
-      <div class="entry">
-        {{ post.excerpt }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Friedrich Doku",
+  "url": "https://fdoku.me/",
+  "email": "friedy@u.northwestern.edu",
+  "jobTitle": "PhD Candidate in Computer Science",
+  "affiliation": { "@type": "Organization", "name": "Northwestern University" },
+  "alumniOf": { "@type": "Organization", "name": "University of Pittsburgh" },
+  "knowsAbout": ["Hardware security", "Side-channel analysis", "Quantum error correction", "Trusted computing", "Operating systems", "FPGA design", "Firmware reverse engineering"],
+  "sameAs": ["https://github.com/friedy10", "https://www.linkedin.com/in/friedrich-doku-34a43a165", "https://arxiv.org/a/doku_f_1"]
+}
+</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <div class="wrap">
+    <a class="sigil" href="/">fd</a>
+    <nav aria-label="Sections">
+      <a href="#research">Research</a>
+      <a href="#publications">Publications</a>
+      <a href="#experience" data-optional>Experience</a>
+      <a href="#writing" data-optional>Writing</a>
+      <a href="assets/friedrich-doku-cv.pdf">CV</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============ hero ============ -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <h1 class="name"><span class="given">Friedrich</span>Doku</h1>
+          <p class="thesis">Software trusts hardware. I measure whether it should.</p>
+          <p class="standfirst prose">
+            I work on hardware security — side channels, firmware, and the physical
+            assumptions sitting underneath trusted computing. Most recently I showed
+            that a quantum error-correction decoder leaks the very errors it is
+            correcting, through nothing but its timing and its power draw.
+          </p>
+          <p class="affil">
+            PhD candidate in Computer Science, Northwestern University<br>
+            Advised by <a href="https://users.cs.northwestern.edu/~pdinda/">Peter Dinda</a><br>
+            Previously Red Balloon Security, Sandia National Laboratories
+          </p>
+          <div class="actions">
+            <a class="btn btn-key" href="assets/friedrich-doku-cv.pdf">Curriculum vitae</a>
+            <a class="btn" href="mailto:friedy@u.northwestern.edu">Email me</a>
+            <a class="btn" href="https://github.com/friedy10">GitHub</a>
+          </div>
+        </div>
+        <div class="portrait">
+          <img src="assets/hero-1600.jpg"
+               srcset="assets/hero-900.jpg 900w, assets/hero-1600.jpg 1600w"
+               sizes="(max-width: 54rem) 22rem, 42vw"
+               width="1600" height="1539"
+               alt="Micro-probes clipped onto the test points of a development board, photographed in black and white.">
+        </div>
       </div>
 
-      <a href="{{ site.baseurl }}{{ post.url }}" class="read-more">Read More</a>
-    </article>
-  {% endfor %}
-</div>
+      <figure class="trace">
+        <svg viewBox="0 0 1200 90" preserveAspectRatio="none" role="img"
+             aria-label="A power trace captured from a surface-code decoder: a flat idle baseline interrupted by bursts, one per decode.">
+          <g class="graticule" aria-hidden="true">
+            <line x1="0" y1="68" x2="1200" y2="68"></line>
+          </g>
+          <path class="wave" d="M 0.0 68.8 L 3.0 67.8 L 6.0 67.9 L 9.0 68.4 L 12.0 67.3 L 15.0 67.5 L 18.0 67.7 L 21.0 68.8 L 24.0 67.4 L 27.0 68.7 L 30.0 67.2 L 33.0 68.5 L 36.0 68.0 L 39.0 68.2 L 42.0 67.7 L 45.0 68.0 L 47.2 54.7 L 49.4 47.8 L 51.6 42.3 L 53.8 37.4 L 56.0 33.1 L 58.2 31.2 L 60.8 30.5 L 63.4 29.1 L 66.0 25.8 L 68.6 25.8 L 71.2 33.7 L 73.8 31.0 L 76.4 34.2 L 79.0 34.6 L 81.6 34.0 L 84.2 33.8 L 86.8 28.8 L 89.2 41.0 L 91.6 49.4 L 94.0 55.2 L 96.4 59.2 L 98.8 61.9 L 101.2 63.8 L 103.6 65.1 L 106.0 69.0 L 109.0 67.7 L 112.0 69.0 L 115.0 68.1 L 118.0 68.2 L 121.0 69.0 L 124.0 67.9 L 127.0 69.0 L 130.0 68.0 L 133.0 67.9 L 136.0 67.4 L 139.0 67.5 L 142.0 67.1 L 145.0 67.4 L 148.0 68.0 L 150.2 54.8 L 152.4 48.0 L 154.6 42.5 L 156.8 37.7 L 159.0 33.3 L 161.2 29.3 L 163.8 30.9 L 166.4 28.7 L 169.0 25.2 L 171.6 30.5 L 174.2 31.4 L 176.8 26.9 L 179.4 25.7 L 182.0 26.1 L 184.4 44.2 L 186.8 54.5 L 189.2 60.4 L 191.6 63.7 L 194.0 69.0 L 197.0 67.0 L 200.0 67.7 L 203.0 67.3 L 206.0 68.2 L 209.0 68.5 L 212.0 68.1 L 215.0 67.9 L 218.0 67.3 L 221.0 68.5 L 224.0 68.0 L 226.2 48.9 L 228.4 39.1 L 230.6 31.2 L 232.8 24.2 L 235.0 16.5 L 237.6 18.0 L 240.2 17.7 L 242.8 13.9 L 245.4 18.2 L 248.0 12.3 L 250.6 19.4 L 253.2 18.3 L 255.8 14.0 L 258.4 14.9 L 260.8 38.5 L 263.2 51.6 L 265.6 58.9 L 268.0 63.0 L 270.4 68.5 L 273.4 67.3 L 276.4 68.3 L 279.4 67.5 L 282.4 67.3 L 285.4 67.1 L 288.4 67.9 L 291.4 68.4 L 294.4 68.0 L 296.6 50.6 L 298.8 41.6 L 301.0 34.4 L 303.2 28.0 L 305.4 22.3 L 307.6 12.9 L 310.2 9.2 L 312.8 14.0 L 315.4 15.8 L 318.0 10.4 L 320.6 16.2 L 323.2 10.9 L 325.8 12.7 L 328.2 33.4 L 330.6 46.3 L 333.0 54.4 L 335.4 59.5 L 337.8 62.7 L 340.2 68.2 L 343.2 68.8 L 346.2 68.8 L 349.2 68.6 L 352.2 68.3 L 355.2 69.0 L 358.2 67.7 L 361.2 68.5 L 364.2 68.0 L 366.4 52.4 L 368.6 44.3 L 370.8 37.8 L 373.0 32.1 L 375.2 26.9 L 377.4 23.8 L 380.0 23.7 L 382.6 22.3 L 385.2 22.5 L 387.8 16.3 L 390.4 24.6 L 393.0 24.7 L 395.6 24.5 L 398.2 16.7 L 400.8 19.2 L 403.4 22.9 L 406.0 19.2 L 408.4 33.1 L 410.8 43.0 L 413.2 50.1 L 415.6 55.2 L 418.0 58.8 L 420.4 61.4 L 422.8 63.3 L 425.2 68.1 L 428.2 68.3 L 431.2 68.4 L 434.2 68.1 L 437.2 68.9 L 440.2 68.4 L 443.2 68.7 L 446.2 68.5 L 449.2 68.0 L 451.4 54.3 L 453.6 47.2 L 455.8 41.4 L 458.0 36.4 L 460.2 31.9 L 462.4 23.4 L 465.0 28.6 L 467.6 30.8 L 470.2 29.7 L 472.8 27.9 L 475.4 23.7 L 478.0 28.5 L 480.6 25.2 L 483.2 27.2 L 485.8 23.1 L 488.4 27.6 L 491.0 27.6 L 493.6 25.8 L 496.0 41.0 L 498.4 50.7 L 500.8 56.9 L 503.2 60.9 L 505.6 63.4 L 508.0 68.3 L 511.0 67.9 L 514.0 68.3 L 517.0 68.1 L 520.0 68.8 L 523.0 68.9 L 526.0 68.2 L 529.0 68.0 L 532.0 67.8 L 535.0 68.0 L 537.2 54.0 L 539.4 46.8 L 541.6 41.0 L 543.8 35.9 L 546.0 31.9 L 548.6 32.5 L 551.2 34.1 L 553.8 28.3 L 556.4 28.8 L 559.0 26.9 L 561.6 33.9 L 564.2 27.3 L 566.8 34.1 L 569.4 33.2 L 572.0 33.9 L 574.6 28.9 L 577.2 28.6 L 579.6 42.4 L 582.0 51.4 L 584.4 57.2 L 586.8 61.0 L 589.2 63.4 L 591.6 68.4 L 594.6 67.9 L 597.6 67.0 L 600.6 68.6 L 603.6 68.5 L 606.6 68.1 L 609.6 68.0 L 612.6 68.7 L 615.6 68.0 L 617.8 53.1 L 620.0 45.4 L 622.2 39.1 L 624.4 33.7 L 626.6 30.8 L 629.2 33.4 L 631.8 32.5 L 634.4 32.9 L 637.0 28.0 L 639.6 33.9 L 642.2 28.1 L 644.8 27.8 L 647.4 28.1 L 649.8 45.0 L 652.2 54.7 L 654.6 60.3 L 657.0 63.6 L 659.4 68.3 L 662.4 69.1 L 665.4 67.0 L 668.4 68.9 L 671.4 68.9 L 674.4 68.6 L 677.4 67.9 L 680.4 68.7 L 683.4 67.5 L 686.4 69.0 L 689.4 68.9 L 692.4 68.0 L 694.6 51.8 L 696.8 43.5 L 699.0 36.8 L 701.2 30.9 L 703.4 25.6 L 705.6 20.1 L 708.2 17.9 L 710.8 23.9 L 713.4 21.3 L 716.0 22.5 L 718.6 18.0 L 721.2 16.6 L 723.8 22.9 L 726.4 23.6 L 729.0 17.9 L 731.6 23.6 L 734.2 16.6 L 736.8 18.6 L 739.2 38.0 L 741.6 49.7 L 744.0 56.9 L 746.4 61.2 L 748.8 63.9 L 751.2 67.1 L 754.2 66.9 L 757.2 67.8 L 760.2 68.2 L 763.2 68.3 L 766.2 67.8 L 769.2 66.9 L 772.2 67.9 L 775.2 68.0 L 777.4 51.5 L 779.6 43.0 L 781.8 36.1 L 784.0 30.0 L 786.2 24.6 L 788.4 15.3 L 791.0 15.9 L 793.6 19.8 L 796.2 23.5 L 798.8 22.9 L 801.4 18.0 L 803.8 34.6 L 806.2 45.7 L 808.6 53.1 L 811.0 58.0 L 813.4 61.3 L 815.8 63.5 L 818.2 69.0 L 821.2 68.9 L 824.2 67.2 L 827.2 69.0 L 830.2 68.4 L 833.2 67.0 L 836.2 69.1 L 839.2 67.7 L 842.2 67.4 L 845.2 68.0 L 848.2 68.9 L 851.2 68.0 L 854.2 68.7 L 857.2 68.0 L 859.4 52.0 L 861.6 43.7 L 863.8 37.1 L 866.0 27.8 L 868.6 28.9 L 871.2 26.9 L 873.8 28.2 L 876.4 26.4 L 879.0 25.7 L 881.6 25.4 L 884.2 24.8 L 886.8 32.1 L 889.4 27.0 L 892.0 27.1 L 894.4 41.4 L 896.8 50.7 L 899.2 56.7 L 901.6 60.7 L 904.0 63.2 L 906.4 68.0 L 909.4 67.9 L 912.4 68.2 L 915.4 67.6 L 918.4 66.9 L 921.4 68.3 L 924.4 67.1 L 927.4 67.1 L 930.4 69.0 L 933.4 67.4 L 936.4 67.2 L 939.4 67.6 L 942.4 68.0 L 944.6 53.3 L 946.8 45.7 L 949.0 39.5 L 951.2 29.7 L 953.8 35.5 L 956.4 36.8 L 959.0 32.3 L 961.6 34.1 L 964.2 29.7 L 966.8 36.4 L 969.4 33.7 L 972.0 38.0 L 974.6 38.8 L 977.2 31.0 L 979.8 33.1 L 982.2 47.0 L 984.6 55.3 L 987.0 60.4 L 989.4 63.4 L 991.8 69.0 L 994.8 67.1 L 997.8 67.7 L 1000.8 68.5 L 1003.8 67.7 L 1006.8 68.5 L 1009.8 67.7 L 1012.8 68.0 L 1015.8 68.9 L 1018.8 67.9 L 1021.8 68.0 L 1024.0 47.1 L 1026.2 36.3 L 1028.4 27.6 L 1030.6 13.9 L 1033.2 17.4 L 1035.8 20.1 L 1038.4 18.1 L 1041.0 22.2 L 1043.6 14.2 L 1046.2 14.3 L 1048.8 16.4 L 1051.2 38.9 L 1053.6 51.6 L 1056.0 58.8 L 1058.4 62.8 L 1060.8 67.4 L 1063.8 67.2 L 1066.8 68.0 L 1069.8 67.3 L 1072.8 68.7 L 1075.8 67.6 L 1078.8 68.5 L 1081.8 68.0 L 1084.8 68.5 L 1087.8 69.0 L 1090.8 68.0 L 1093.0 53.1 L 1095.2 45.5 L 1097.4 39.3 L 1099.6 33.9 L 1101.8 29.0 L 1104.0 26.1 L 1106.6 26.8 L 1109.2 19.9 L 1111.8 21.2 L 1114.4 20.4 L 1117.0 26.6 L 1119.6 21.3 L 1122.2 20.3 L 1124.8 18.7 L 1127.4 20.8 L 1129.8 37.7 L 1132.2 48.5 L 1134.6 55.5 L 1137.0 59.9 L 1139.4 62.8 L 1141.8 68.1 L 1144.8 69.0 L 1147.8 69.1 L 1150.8 67.9 L 1153.8 67.2 L 1156.8 67.7 L 1159.8 67.0 L 1162.8 68.8 L 1165.8 68.2 L 1168.8 68.2 L 1171.8 67.4 L 1174.8 68.3 L 1177.8 68.0 L 1180.0 54.8 L 1182.2 47.9 L 1184.4 42.4 L 1186.6 37.6 L 1188.8 33.3 L 1191.0 28.8 L 1193.6 26.6 L 1196.2 30.2 L 1198.8 27.7"></path>
+        </svg>
+        <figcaption>Decoder power trace — every burst is one round of error correction, and its shape gives away the syndrome.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ research ============ -->
+  <section class="band" id="research">
+    <div class="wrap">
+      <div class="band-head">
+        <h2>Research</h2>
+        <span class="band-note">findings in amber, systems in blue</span>
+      </div>
+
+      <div class="entries">
+
+        <article class="entry">
+          <div class="entry-meta">
+            <span class="entry-when">2025 — now</span>
+            <span class="entry-where">Northwestern</span>
+            <span class="kind kind-finding">finding</span>
+          </div>
+          <div>
+            <h3>A side channel in the classical half of a quantum computer</h3>
+            <p>
+              Fault-tolerant quantum computing depends on a classical decoder that
+              interprets error syndromes in real time. I showed, for the first time on
+              real hardware, that this decoder's execution time and power draw leak the
+              syndrome it is processing — the error-correction machinery betrays the
+              errors it exists to hide.
+            </p>
+            <p>
+              To measure it I ported the distributed union-find decoder (Helios) and a
+              constant-latency lookup-table decoder to a Xilinx Artix-7 and built the
+              full measurement pipeline, capturing per-decode timing and power across
+              hundreds of thousands of decodes of real Google Willow surface-code
+              syndromes at distances 3 and 5. From timing alone the traces fingerprint
+              individual IBM Heron processors with up to 89% accuracy, and recover code
+              distance, logical error rate, and detector-firing structure.
+            </p>
+            <div class="entry-links">
+              <a href="https://arxiv.org/abs/2609.12145">arXiv:2609.12145</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="entry">
+          <div class="entry-meta">
+            <span class="entry-when">2024 — now</span>
+            <span class="entry-where">Northwestern</span>
+            <span class="kind kind-system">system</span>
+          </div>
+          <div>
+            <h3>CAPIO — giving applications the device, not the keys to it</h3>
+            <p>
+              Kernel bypass lets an application talk straight to a NIC or NVMe drive,
+              which is fast, but the registers it legitimately needs often share a page
+              with registers it absolutely should not touch. CAPIO is a capability-based
+              design that grants userspace exactly the MMIO registers it is entitled to
+              and isolates the privileged ones at the same granularity, on commodity
+              hardware.
+            </p>
+            <p>
+              I built the kernel and device-driver mechanisms underneath it, and mentor
+              the students working on the systems implementation.
+            </p>
+            <div class="entry-links">
+              <a href="https://arxiv.org/abs/2512.16957">arXiv:2512.16957</a>
+              <span class="status">ROSS @ SC26, to appear</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="entry">
+          <div class="entry-meta">
+            <span class="entry-when">2024 — now</span>
+            <span class="entry-where">Northwestern</span>
+            <span class="kind kind-system">system</span>
+          </div>
+          <div>
+            <h3>TrustCheckpoints — a root of trust with no secret to steal</h3>
+            <p>
+              Attestation normally rests on a key burned into the device or a dedicated
+              trusted element, both of which are things an attacker can extract or a
+              manufacturer can get wrong. TrustCheckpoints needs neither: a verifier
+              issues randomized polynomial memory challenges whose timing a compromised
+              device cannot fake, so malware gives itself away by being too slow.
+            </p>
+            <p>
+              The prototype is end to end — firmware, hypervisor, Linux, and an external
+              verifier — running on ARM Cortex-A53.
+            </p>
+            <div class="entry-links">
+              <a href="https://arxiv.org/abs/2509.22762">arXiv:2509.22762</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="entry">
+          <div class="entry-meta">
+            <span class="entry-when">2022 — 2025</span>
+            <span class="entry-where">Pitt · Northwestern · Michigan</span>
+            <span class="kind kind-system">system</span>
+          </div>
+          <div>
+            <h3>Privacy Backplane</h3>
+            <p>
+              Systems mechanisms that let people see and control the data their IoT
+              devices collect, including an ARM/Linux video pipeline and the kernel-level
+              components beneath it.
+            </p>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ publications ============ -->
+  <section class="band" id="publications">
+    <div class="wrap">
+      <div class="band-head">
+        <h2>Publications</h2>
+      </div>
+
+      <ol class="pubs">
+        <li class="pub">
+          <div class="pub-year">2026</div>
+          <div>
+            <p class="pub-title">Hardware Fingerprinting FTQC via Quantum Decoder Timing</p>
+            <p class="pub-authors"><span class="me">F. Doku</span>, J. Szefer, K. N. Smith</p>
+            <div class="pub-links"><a href="https://arxiv.org/abs/2609.12145">arXiv:2609.12145</a></div>
+          </div>
+        </li>
+        <li class="pub">
+          <div class="pub-year">2026</div>
+          <div>
+            <p class="pub-title">CAPIO: Safe Kernel-Bypass of Commodity Devices using Capabilities</p>
+            <p class="pub-authors"><span class="me">F. Doku</span> et al.</p>
+            <p class="pub-venue"><em>Workshop on Runtime and Operating Systems for Supercomputers (ROSS)</em>, SC26</p>
+            <div class="pub-links">
+              <a href="https://arxiv.org/abs/2512.16957">arXiv:2512.16957</a>
+              <span class="status">To appear</span>
+            </div>
+          </div>
+        </li>
+        <li class="pub">
+          <div class="pub-year">2025</div>
+          <div>
+            <p class="pub-title">TrustCheckpoints: Time Betrays Malware for Unconditional Software Root of Trust</p>
+            <p class="pub-authors"><span class="me">F. Doku</span> et al.</p>
+            <div class="pub-links"><a href="https://arxiv.org/abs/2509.22762">arXiv:2509.22762</a></div>
+          </div>
+        </li>
+        <li class="pub">
+          <div class="pub-year">2020</div>
+          <div>
+            <p class="pub-title">Khopesh: Contact Tracing Without Sacrificing Privacy</p>
+            <p class="pub-authors"><span class="me">F. Doku</span> et al.</p>
+            <p class="pub-venue"><em>International Conference on Security and Privacy in Communication Systems (SecureComm)</em></p>
+            <div class="pub-links"><a href="https://link.springer.com/chapter/10.1007/978-3-030-63095-9_10">Springer</a></div>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ experience ============ -->
+  <section class="band" id="experience">
+    <div class="wrap">
+      <div class="band-head">
+        <h2>Experience</h2>
+        <span class="band-note">industry and national lab</span>
+      </div>
+
+      <div class="entries">
+        <article class="entry">
+          <div class="entry-meta">
+            <span class="entry-when">Dec 2023 — Jul 2024</span>
+            <span class="entry-where">New York, NY</span>
+          </div>
+          <div>
+            <h3>Reverse Engineer, Red Balloon Security</h3>
+            <p>
+              Reverse-engineered ARM firmware and embedded systems to find
+              vulnerabilities, and built RASPUTIN, an automated reverse-engineering
+              system.
+            </p>
+          </div>
+        </article>
+
+        <article class="entry">
+          <div class="entry-meta">
+            <span class="entry-when">May 2022 — Apr 2023</span>
+            <span class="entry-where">Albuquerque, NM</span>
+          </div>
+          <div>
+            <h3>TITANS Cybersecurity R&amp;D Intern, Sandia National Laboratories</h3>
+            <p>Kernel- and hypervisor-level software for ARM systems in a cybersecurity research group.</p>
+          </div>
+        </article>
+
+        <article class="entry">
+          <div class="entry-meta">
+            <span class="entry-when">May — Jul 2023</span>
+            <span class="entry-where">Pittsburgh, PA</span>
+          </div>
+          <div>
+            <h3>Software Engineering Intern, Carnegie Robotics</h3>
+            <p>Embedded test software for camera sensors, kernel-level ARM code, PCBs, and hardware automation.</p>
+          </div>
+        </article>
+
+        <article class="entry">
+          <div class="entry-meta">
+            <span class="entry-when">Aug 2021 — Sep 2022</span>
+            <span class="entry-where">Remote</span>
+          </div>
+          <div>
+            <h3>Software Engineer, Whonix</h3>
+            <p>Kernel-module signing and live-boot for a privacy-focused Linux distribution.</p>
+          </div>
+        </article>
+
+        <article class="entry">
+          <div class="entry-meta">
+            <span class="entry-when">May — Aug 2021</span>
+            <span class="entry-where">Remote</span>
+          </div>
+          <div>
+            <h3>Software Engineer Intern, Oracle</h3>
+            <p>A secure IoT data store built on Oracle Cloud and trusted hardware, with embedded Linux, BusyBox, and U-Boot underneath.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ writing ============ -->
+  <section class="band" id="writing">
+    <div class="wrap">
+      <div class="band-head">
+        <h2>Writing</h2>
+        <span class="band-note">notes from the bring-up bench</span>
+      </div>
+
+      <div class="notes">
+        <article class="note">
+          <div class="note-date">Jul 2021</div>
+          <div>
+            <h3><a href="writing/hafnium-pine64.html">Installing Hafnium on the PINE64-LTS</a></h3>
+            <p>Bringing Google's type-1 hypervisor up on a board it has never heard of: TF-A, U-Boot, a hand-written UART driver, and a new toolchain target.</p>
+          </div>
+        </article>
+        <article class="note">
+          <div class="note-date">May 2021</div>
+          <div>
+            <h3><a href="writing/bare-metal-arm.html">Getting started with bare metal on ARM</a></h3>
+            <p>What a device tree actually describes, why embedded systems need one when x86 does not, and how U-Boot gets you to a kernel.</p>
+          </div>
+        </article>
+        <article class="note">
+          <div class="note-date">May 2021</div>
+          <div>
+            <h3><a href="writing/usb-camera-linux.html">Capturing images from a USB camera in C on Linux</a></h3>
+            <p>Getting Video4Linux into your kernel config, then pulling frames off the device with a small header and no framework.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ contact ============ -->
+  <section class="band" id="contact">
+    <div class="wrap">
+      <div class="band-head">
+        <h2>Contact</h2>
+      </div>
+
+      <div class="contact-grid">
+        <div>
+          <h3>Email</h3>
+          <p><a href="mailto:friedy@u.northwestern.edu">friedy@u.northwestern.edu</a></p>
+        </div>
+        <div>
+          <h3>Code</h3>
+          <p><a href="https://github.com/friedy10">github.com/friedy10</a></p>
+        </div>
+        <div>
+          <h3>Elsewhere</h3>
+          <p><a href="https://www.linkedin.com/in/friedrich-doku-34a43a165">LinkedIn</a></p>
+          <p><a href="https://arxiv.org/a/doku_f_1">arXiv</a></p>
+        </div>
+        <div>
+          <h3>Documents</h3>
+          <p><a href="assets/friedrich-doku-cv.pdf">Curriculum vitae (PDF)</a></p>
+        </div>
+      </div>
+
+      <details class="pgp">
+        <summary>PGP public key — 2B1A 42AE FE17 81AB BCB4 A1DF D96D D17A 32AA B935</summary>
+        <pre>-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+xjMEZY9wIBYJKwYBBAHaRw8BAQdANNFhw9uJPuq9oFyy8xSL/KICHEbL1bJOZC79
+U6bg1aDNKEZyaWVkcmljaCBEb2t1IDxmcmllZHJpY2hkb2t1QGdtYWlsLmNvbT7C
+iQQTFggAMRYhBCsaQq7+F4GrvLSh39lt0Xoyqrk1BQJlj3AgAhsDBAsJCAcFFQgJ
+CgsFFgIDAQAACgkQ2W3RejKquTUc7wEAmlkQCG/AqqyCNKXZ5TZtK6Zj+J1MzpQW
+PnNj9IHGEZ8A/2VT9aLi4pdKVY94GvLD6oTisN+mFYYg9LP3dTA17pYAzjgEZY9w
+IBIKKwYBBAGXVQEFAQEHQJ5poy1A3QW7K1NgSfqn7qgs6y6pedqAxLJqjVR3CONk
+AwEIB8J4BBgWCAAgFiEEKxpCrv4Xgau8tKHf2W3RejKquTUFAmWPcCACGwwACgkQ
+2W3RejKquTUVhAD/XX2ftGFTFWkQBJEXX9XVi2YY2TYz3v8AEkPWFZdljkkA/ijt
+Ziic5yHUYnKzFaPhceVBJk4YUfXxAPOUCLkJU6MO
+=awGI
+-----END PGP PUBLIC KEY BLOCK-----</pre>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Friedrich Doku — Evanston, Illinois</span>
+    <span>Set in IBM Plex. Built by hand.</span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installing Hafnium on the PINE64-LTS — Friedrich Doku</title>
+<meta name="description" content="Bringing Google&#x27;s Hafnium type-1 hypervisor up on a PINE64-LTS: TF-A, U-Boot, a hand-written UART driver, and a new toolchain target.">
+<link rel="canonical" href="https://fdoku.me/writing/hafnium-pine64.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Installing Hafnium on the PINE64-LTS">
+<meta property="og:description" content="Bringing Google&#x27;s Hafnium type-1 hypervisor up on a PINE64-LTS: TF-A, U-Boot, a hand-written UART driver, and a new toolchain target.">
+<meta property="og:image" content="https://fdoku.me/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%2307090b'/><text x='16' y='23' font-family='monospace' font-size='18' font-weight='600' fill='%2323a0ff' text-anchor='middle'>fd</text></svg>">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <div class="wrap">
+    <a class="sigil" href="../">fd</a>
+    <nav aria-label="Sections">
+      <a href="../#research">Research</a>
+      <a href="../#publications">Publications</a>
+      <a href="../#writing" data-optional>Writing</a>
+      <a href="../assets/friedrich-doku-cv.pdf">CV</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="article">
+  <div class="wrap">
+    <div class="article-head">
+      <a class="back" href="../#writing">Back to writing</a>
+      <h1>Installing Hafnium on the PINE64-LTS</h1>
+      <p class="article-meta"><span class="vintage">July 2021</span> — written as an undergraduate at Pitt</p>
+    </div>
+
+    <div class="body">
+<p>
+  Hafnium is a type-1 hypervisor that enforces memory isolation between the virtual
+  machines running on top of it, installed directly on the underlying hardware. This
+  walks through standing it up on a PINE64-LTS — a board Hafnium does not support out
+  of the box, so part of the work is adding a new target to its build.
+</p>
+
+<h2>Firmware</h2>
+<p>
+  Before anything else we need a secondary program loader, EL3 runtime firmware, and a
+  bootloader.
+</p>
+
+<h3>ARM Trusted Firmware-A</h3>
+<p>
+  TF-A provides the EL3 runtime secure monitor on the Pine A64-LTS. It is what switches
+  between the normal and secure worlds.
+</p>
+<pre><code>git clone https://review.trustedfirmware.org/TF-A/trusted-firmware-a
+cd trusted-firmware-a
+git checkout v2.2
+make PLAT=sun50i_a64 DEBUG=1 bl31
+export BL31=$(pwd)/build/sun50i_a64/debug/bl31.bin</code></pre>
+
+<h3>U-Boot</h3>
+<p>With trusted firmware in place, build U-Boot as the normal-world bootloader.</p>
+<pre><code>git clone https://gitlab.denx.de/u-boot/u-boot.git
+cd u-boot
+git checkout v2020.04-rc3
+make pine64_plus_defconfig
+make
+export PATH=$PATH:$(pwd)/tools/</code></pre>
+<p>
+  TF-A and U-Boot end up packaged together in <code>u-boot-sunxi-with-spl.bin</code>.
+  Later we write that to the SD card at an 8 KB offset, ahead of the first partition.
+</p>
+
+<h2>The Hafnium RAM disk</h2>
+<p>
+  Create a directory called <code>hrdisk</code>, and inside it a file
+  <code>manifest.dts</code>:
+</p>
+<pre><code>/dts-v1/;
+
+/ {
+	hypervisor {
+		compatible = "hafnium,hafnium";
+		vm1 {
+			debug_name = "Linux VM";
+			kernel_filename = "vmlinuz";
+			ramdisk_filename = "initrd.img";
+		};
+	};
+};</code></pre>
+<p>
+  The manifest is how Hafnium learns what VMs to create. Here there is exactly one,
+  running Linux.
+</p>
+<figure><img src="../images/h1.png" alt="Terminal showing the manifest.dts file contents." loading="lazy"><figcaption>The manifest describing a single Linux VM.</figcaption></figure>
+<p>Compile it to a device tree blob:</p>
+<pre><code>dtc -O dtb -o manifest.dtb -I dts manifest.dts</code></pre>
+
+<h3>Linux</h3>
+<p>From the <code>hrdisk</code> directory, build the kernel:</p>
+<pre><code>git clone https://github.com/torvalds/linux.git
+cd linux
+ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make defconfig
+ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j24</code></pre>
+
+<h3>The Hafnium kernel module</h3>
+<p>Back in <code>hrdisk</code>:</p>
+<pre><code>sudo apt install make libssl-dev flex bison python3 python3-serial</code></pre><pre><code>git clone --recurse-submodules https://hafnium.googlesource.com/hafnium \
+  &amp;&amp; (cd hafnium &amp;&amp; f=`git rev-parse --git-dir`/hooks/commit-msg ; \
+      curl -Lo $f https://gerrit-review.googlesource.com/tools/hooks/commit-msg ; \
+      chmod +x $f)</code></pre>
+<p>
+  To build the module against a newer kernel you have to delete lines 765 and 766 of
+  <code>main.c</code>.
+</p>
+<pre><code>cd hafnium/driver/linux/</code></pre><figure><img src="../images/h2.png" alt="Source edit removing two incompatible lines from main.c." loading="lazy"><figcaption>The two lines to remove before the module will build on a modern kernel.</figcaption></figure><pre><code>ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- KERNEL_PATH=../../../linux/ make</code></pre>
+<p>The <code>hrdisk</code> directory should now look like this:</p>
+<figure><img src="../images/h3.png" alt="Directory listing of hrdisk showing linux, hafnium and manifest files." loading="lazy"><figcaption>Everything in place before building the RAM disk.</figcaption></figure>
+
+<h3>BusyBox</h3>
+<p>
+  The Linux VM needs a userspace. Build a BusyBox root filesystem for the RAM disk —
+  again from <code>hrdisk</code>:
+</p>
+<pre><code>git clone git://busybox.net/busybox.git
+cd busybox
+ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make defconfig
+ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make menuconfig</code></pre>
+<p>
+  Before leaving menuconfig, make sure <code>Settings &gt; Build static binary (no
+  shared libs)</code> is selected.
+</p>
+<figure><img src="../images/h4.png" alt="BusyBox menuconfig with the static binary option selected." loading="lazy"><figcaption>Static linking — there is no dynamic loader in this RAM disk.</figcaption></figure><pre><code>ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j24
+ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make install
+cd _install
+mkdir proc
+mkdir sys
+mkdir -p etc/init.d
+cat &lt;&lt;EOF &gt; etc/init.d/rcS
+#!bin/sh
+mount -t proc none /proc
+mount -t sysfs none /sys
+EOF
+chmod u+x etc/init.d/rcS
+grep -v tty ../examples/inittab &gt; ./etc/inittab</code></pre>
+<p>Copy the Hafnium module into the RAM disk and pack it:</p>
+<pre><code>cp ../../hafnium/driver/linux/hafnium.ko .
+find . | cpio -o -H newc | gzip &gt; ../initrd.img
+cd ..</code></pre>
+
+<h3>Building the RAM disk</h3>
+<pre><code>mkdir disk
+cd disk
+mv ../busybox/initrd.img .
+mv ../manifest.dtb .
+mv ../linux/arch/arm64/boot/Image vmlinuz
+find . | cpio -o &gt; ../initrd.img; cd -
+mkimage -A arm64 -T ramdisk -C none -n uInitrd -d initrd.img uInitrd</code></pre>
+
+<h2>Adding PINE64-LTS support</h2>
+<p>From <code>hrdisk</code>:</p>
+<pre><code>cd hafnium/project/reference</code></pre>
+<p>Open <code>BUILD.gn</code> and add the new target to the list:</p>
+<pre><code>"//src:hafnium(:pine64_clang)"</code></pre><figure><img src="../images/h5.png" alt="BUILD.gn edited to add the pine64 clang toolchain target." loading="lazy"><figcaption>Registering the new board with Hafnium's build.</figcaption></figure>
+<p>Then append the toolchain definition to the bottom of the same file:</p>
+<pre><code>aarch64_toolchains("pine64") {
+  cpu = "cortex-a53"
+  origin_address = "0x4a000000"
+  boot_flow = "//src/boot_flow:linux"
+  console = "//project/reference/pine:uart"
+  iommu = "//src/iommu:absent"
+  gic_version = 2
+  heap_pages = 60
+  max_cpus = 4
+  max_vms = 16
+  toolchain_args = {
+    uart_base_address = "0x01C28000"
+  }
+}</code></pre>
+<p>Create two directories alongside it:</p>
+<pre><code>mkdir pine
+mkdir pine64
+cd pine
+touch args.gni BUILD.gn uart.c</code></pre>
+<p><code>args.gni</code>:</p>
+<pre><code>declare_args() {
+  uart_base_address = 0
+}</code></pre>
+<p><code>BUILD.gn</code>:</p>
+<pre><code>import("args.gni")
+
+source_set("uart") {
+  sources = [
+    "uart.c",
+  ]
+
+  assert(uart_base_address != 0,
+         "\"uart_base_address\" must be defined for ${target_name}.")
+
+  defines = [
+    "UART_BASE=${uart_base_address}",
+  ]
+}</code></pre>
+<p>
+  And <code>uart.c</code> — the actual console driver, which is the part that has to be
+  written by hand for a new board:
+</p>
+<pre><code>#include "hf/io.h"
+#include "hf/mm.h"
+#include "hf/mpool.h"
+#include "hf/plat/console.h"
+
+#define UART_RBR IO32_C(UART_BASE + 0x00)
+#define UART_THR IO32_C(UART_BASE + 0x00)
+#define UART_DLL IO32_C(UART_BASE + 0x00)
+#define UART_IER IO32_C(UART_BASE + 0x04)
+#define UART_DLM IO32_C(UART_BASE + 0x04)
+#define UART_FCR IO32_C(UART_BASE + 0x08)
+#define UART_LCR IO32_C(UART_BASE + 0x0C)
+#define UART_MCR IO32_C(UART_BASE + 0x10)
+#define UART_LSR IO32_C(UART_BASE + 0x14)
+#define UART_MSR IO32_C(UART_BASE + 0x18)
+#define UART_SCR IO32_C(UART_BASE + 0x1C)
+
+void plat_console_init(void)
+{
+}
+
+void plat_console_mm_init(struct mm_stage1_locked stage1_locked,
+			  struct mpool *ppool)
+{
+	mm_identity_map(stage1_locked, pa_init(UART_BASE),
+			pa_add(pa_init(UART_BASE), PAGE_SIZE),
+			MM_MODE_R | MM_MODE_W | MM_MODE_D, ppool);
+}
+
+void plat_console_putchar(char c)
+{
+	/* Print a carriage-return as well. */
+	if (c == '\n') {
+		plat_console_putchar('\r');
+	}
+
+	/* Wait until the transmitter is no longer busy. */
+	while ((io_read32(UART_LSR) &amp; 0x20) == 0) continue;
+
+	/* Write data to transmitter FIFO. */
+	memory_ordering_barrier();
+	io_write32(UART_THR, c);
+	memory_ordering_barrier();
+}
+
+char plat_console_getchar(void)
+{
+	/* Wait for the transmitter to be ready to deliver a byte. */
+	while ((io_read32(UART_LSR) &amp; 0x01) == 0) continue;
+
+	/* Read data from transmitter FIFO. */
+	return (char)(io_read32(UART_RBR));
+}</code></pre>
+<p>In <code>pine64/BUILD.gn</code>, a stub is enough:</p>
+<pre><code>source_set("pine64") {
+}</code></pre>
+<p>Then build Hafnium:</p>
+<pre><code>make</code></pre>
+
+<h2>Booting</h2>
+<p>
+  Partition the SD card. The first partition is the boot partition; the second is there
+  for a root filesystem, which this walkthrough does not cover.
+</p>
+<pre><code>sudo dd if=/dev/zero of=/dev/sdX bs=1M count=1
+sudo blockdev --rereadpt /dev/sdX
+
+cat &lt;&lt;EOT | sudo sfdisk /dev/sdX
+2M,2048M,c
+,,L
+EOT
+
+sudo mkfs.ext4 /dev/sdX1
+sudo mkfs.ext4 /dev/sdX2</code></pre>
+<p>From the U-Boot directory, write the bootloader ahead of the first partition:</p>
+<pre><code>dd if=u-boot-sunxi-with-spl.bin of=/dev/sdX bs=1k seek=8</code></pre>
+<p>
+  Mount the boot partition and copy everything across. The prebuilt
+  <code>hafnium_pine64-lts_boot.tar.gz</code> was hosted on my university OneDrive at
+  the time of writing and that link has since expired — if you need it,
+  <a href="mailto:friedy@u.northwestern.edu">email me</a>.
+</p>
+<pre><code>sudo mount /dev/sdX1 /mnt
+tar -xvf hafnium_pine64-lts_boot.tar.gz
+cp -r ./boot /mnt
+rm /mnt/hafnium.bin
+rm /mnt/uInitrd
+
+cp ~/hrdisk/hafnium/out/reference/pine64_clang/hafnium.bin /mnt
+cp ~/hrdisk/uInitrd /mnt</code></pre>
+<p>Eject the card, boot the PINE64-LTS, and Hafnium should come up with Linux on top of it.</p>
+    </div>
+
+    <div class="article-foot">
+      Questions or corrections: <a href="mailto:friedy@u.northwestern.edu">friedy@u.northwestern.edu</a>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Friedrich Doku — Evanston, Illinois</span>
+    <span><a href="../">fdoku.me</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
