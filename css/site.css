@@ -104,14 +104,23 @@ a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
 
 .name {
   font-family: var(--mono);
-  font-size: clamp(2.3rem, 6.4vw, 4.1rem);
+  font-size: clamp(2.7rem, 7.6vw, 4.8rem);
   font-weight: 500;
-  line-height: 1.02;
-  letter-spacing: -0.035em;
-  color: var(--bright);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--probe);
   margin: 0 0 1.6rem;
 }
-.name .given { display: block; color: var(--probe); }
+/* the name on the papers, kept legible under the one he goes by */
+.name .fullname {
+  display: block;
+  font-size: clamp(0.84rem, 1.5vw, 0.97rem);
+  font-weight: 400;
+  letter-spacing: 0.055em;
+  line-height: 1.4;
+  color: var(--text);
+  margin-top: 0.8rem;
+}
 
 .thesis {
   font-family: var(--sans);
