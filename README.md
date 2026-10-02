@@ -32,11 +32,16 @@ python3 -m http.server 8000
 
 ## Custom domain
 
-`fdoku.me` currently points at Hostinger. To move it here:
+`fdoku.me` is registered at Namecheap and uses Namecheap BasicDNS
+(`dns1`/`dns2.registrar-servers.com`). The zone holds:
 
-1. Point the apex record at GitHub Pages (`185.199.108.153`, `.109.153`, `.110.153`,
-   `.111.153`), or CNAME `www` to `friedy10.github.io`.
-2. Add a `CNAME` file at the repo root containing `fdoku.me`.
-3. Enable *Enforce HTTPS* in the repository's Pages settings.
+| Type  | Host | Value                              |
+|-------|------|------------------------------------|
+| A     | `@`  | `185.199.108.153`                  |
+| A     | `@`  | `185.199.109.153`                  |
+| A     | `@`  | `185.199.110.153`                  |
+| A     | `@`  | `185.199.111.153`                  |
+| CNAME | `www`| `friedy10.github.io.`              |
 
-Until step 2, the site serves from <https://friedy10.github.io>.
+The `CNAME` file at the repo root is what tells GitHub Pages to answer for
+`fdoku.me` — deleting it reverts the site to <https://friedy10.github.io>.
