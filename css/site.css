@@ -118,7 +118,7 @@ a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
   font-weight: 400;
   letter-spacing: 0.01em;
   line-height: 1.3;
-  color: var(--mute);
+  color: var(--signal);
   margin-top: 0.25rem;
 }
 
