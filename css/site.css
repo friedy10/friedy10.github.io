@@ -434,3 +434,10 @@ a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
   .lb-prev { left: 1rem; } .lb-next { right: 1rem; }
   .lb-count { bottom: 1.4rem; }
 }
+
+/* Section notes are nowrap so they sit tight against the heading rule on
+   desktop; on narrow screens they need their own line or they overflow. */
+@media (max-width: 46rem) {
+  .band-head { flex-wrap: wrap; row-gap: 0.45rem; }
+  .band-note { white-space: normal; order: 3; flex: 1 0 100%; }
+}
