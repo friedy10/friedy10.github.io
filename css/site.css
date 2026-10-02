@@ -90,7 +90,11 @@ a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
 
 /* ---------- hero ---------- */
 
-.hero { padding-top: clamp(3.5rem, 9vw, 7rem); position: relative; overflow: hidden; }
+.hero {
+  padding-top: clamp(3.5rem, 9vw, 7rem);
+  padding-bottom: clamp(3rem, 7vw, 5.5rem);
+  position: relative; overflow: hidden;
+}
 .hero-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
@@ -161,26 +165,6 @@ a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
   .hero-grid { grid-template-columns: 1fr; }
   .portrait { order: -1; max-width: 20rem; -webkit-mask-image: none; mask-image: none; }
   .portrait img { -webkit-mask-image: none; mask-image: none; }
-}
-
-/* the single orchestrated moment: a decoder power trace, swept once on load */
-.trace { margin-top: clamp(2.5rem, 6vw, 4.5rem); }
-.trace svg { display: block; width: 100%; height: clamp(58px, 7vw, 90px); overflow: visible; }
-.trace .graticule { stroke: var(--line-soft); stroke-width: 1; }
-.trace .wave {
-  fill: none; stroke: var(--signal); stroke-width: 1.4;
-  stroke-linejoin: round; stroke-linecap: round;
-  filter: drop-shadow(0 0 6px rgba(232,163,61,0.3));
-  stroke-dasharray: 4200; stroke-dashoffset: 4200;
-  animation: sweep 2.1s cubic-bezier(0.22, 0.9, 0.3, 1) 0.35s forwards;
-}
-@keyframes sweep { to { stroke-dashoffset: 0; } }
-@media (prefers-reduced-motion: reduce) {
-  .trace .wave { animation: none; stroke-dashoffset: 0; }
-}
-.trace figcaption {
-  font-family: var(--mono); font-size: 0.74rem; color: var(--mute);
-  margin-top: 0.7rem; letter-spacing: 0.01em;
 }
 
 /* ---------- sections ---------- */
